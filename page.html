@@ -1,83 +1,318 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LLM 实验室 | Large Language Model Lab</title>
-  <meta name="description" content="专注于大语言模型（LLMs）、智能体、对齐与评测的学术研究实验室官方网站。" />
-  <meta property="og:title" content="LLM 实验室" />
-  <meta property="og:description" content="专注于大语言模型（LLMs）、智能体、对齐与评测的学术研究实验室官方网站。" />
-  <meta property="og:type" content="website" />
-  <meta name="theme-color" content="#111827" />
-  <style>
-    :root{
-      --bg: #0b1020;           /* 深色背景 */
-      --bg-soft:#0f172a;       /* 深色柔和背景 */
-      --card:#111827;          /* 卡片背景 */
-      --text:#e5e7eb;          /* 主文字 */
-      --muted:#94a3b8;         /* 次文字 */
-      --brand:#60a5fa;         /* 品牌主色 */
-      --brand-2:#a78bfa;       /* 品牌渐变色 */
-      --accent:#34d399;        /* 点缀色 */
-      --ring: 0 0 0 3px rgba(96,165,250,.35);
-      --radius: 16px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-      --maxw: 1200px;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%;scroll-behavior:smooth;background:var(--bg);color:var(--text);font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", Helvetica, Arial, "Noto Sans", sans-serif}
-    a{color:inherit;text-decoration:none}
-    img{max-width:100%;display:block}
-    .container{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+import React from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { GraduationCap, Award, FlaskConical, Hammer, Mail, MapPin, Download, Github, Linkedin, Globe, ChevronRight } from "lucide-react";
 
-    /* 顶部导航 */
-    header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg, rgba(11,16,32,.95), rgba(11,16,32,.75) 60%, rgba(11,16,32,0));backdrop-filter:saturate(140%) blur(8px);border-bottom:1px solid rgba(255,255,255,.06)}
-    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:36px;height:36px;border-radius:10px;background:conic-gradient(from 210deg, var(--brand), var(--brand-2), var(--accent));box-shadow:0 0 0 1px rgba(255,255,255,.08), 0 6px 16px rgba(0,0,0,.35)}
-    .brand h1{font-size:18px;letter-spacing:.3px;margin:0}
-    nav ul{list-style:none;margin:0;padding:0;display:flex;gap:14px;align-items:center}
-    .nav a{padding:10px 12px;border-radius:10px;color:var(--muted)}
-    .nav a.active, .nav a:hover{color:#fff;background:rgba(255,255,255,.06)}
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#0b1020;font-weight:600;box-shadow:0 6px 18px rgba(96,165,250,.35);border:0}
-    .btn:focus{outline:none;box-shadow:var(--ring)}
-    .ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.12)}
-    .ghost:hover{background:rgba(255,255,255,.06)}
-    .menu{display:none}
+// ======== 可编辑的数据区（把占位内容换成你的真实信息） ========
+const PROFILE = {
+  name: "你的姓名",
+  title: "你的身份/方向（如：计算机科学本科生 / 前端开发 / 数据科学）",
+  location: "城市, 国家",
+  contactEmail: "you@example.com",
+  avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=400&h=400&fit=crop&auto=format", // 替换为你的头像链接
+  summary:
+    "一句话总结你的特长/兴趣领域。再补充 1-2 句说明你在做什么、擅长什么、希望找到怎样的机会。",
+  links: {
+    github: "https://github.com/yourname",
+    linkedin: "https://www.linkedin.com/in/yourname/",
+    website: "https://yourdomain.com",
+    resume: "/resume.pdf", // 简历 PDF 的路径（放到 public 目录）
+  },
+  basics: [
+    { label: "学校", value: "XX 大学" },
+    { label: "学院/系", value: "计算机科学与技术学院" },
+    { label: "专业", value: "计算机科学与技术" },
+    { label: "学位", value: "本科（201X–202X）" },
+    { label: "绩点/排名", value: "GPA 3.8/4.0（前 10%）" },
+    { label: "技能", value: "C++ / Python / JavaScript / React / PyTorch / 数据结构与算法" },
+  ],
+};
 
-    /* Hero */
-    .hero{padding:56px 0 24px}
-    .hero .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}
-    .hero h2{font-size:42px;line-height:1.15;margin:0 0 12px}
-    .hero p{font-size:18px;color:var(--muted);margin:0 0 20px}
-    .tagbar{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
-    .tag{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.14);color:#cbd5e1;font-size:13px}
-    .card{background:linear-gradient(180deg, rgba(17,24,39,.9), rgba(17,24,39,.8));border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow);border-radius:var(--radius);padding:18px}
-    .hero-visual{min-height:260px;display:grid;place-items:center;position:relative;overflow:hidden}
-    .glow{position:absolute;inset:-30%;filter:blur(40px);opacity:.35;background:radial-gradient(600px 300px at 20% 30%, rgba(96,165,250,.35), transparent), radial-gradient(500px 260px at 80% 70%, rgba(167,139,250,.3), transparent), radial-gradient(420px 220px at 50% 50%, rgba(52,211,153,.25), transparent)}
-    .matrix{position:relative;border-radius:14px;border:1px solid rgba(255,255,255,.09);padding:14px;background:rgba(2,6,23,.5)}
-    .matrix pre{margin:0;white-space:pre-wrap;word-break:break-word;color:#e2e8f0;font-size:12px;line-height:1.5;max-height:280px;overflow:auto}
+const COMPETITIONS = [
+  {
+    name: "ACM-ICPC 区域赛",
+    level: "银奖",
+    org: "ICPC",
+    date: "2024-11",
+    team: "队伍名称 / 角色（队长/解题手）",
+    highlights: [
+      "区域排名前 5%，解决 8/12 题",
+      "负责图论与动态规划方向，平均每题 30 分钟内提交"
+    ],
+    link: "#",
+  },
+  {
+    name: "中国大学生数学建模竞赛",
+    level: "省一",
+    org: "高教社杯",
+    date: "2023-09",
+    team: "三人团队 / 你负责建模与可视化",
+    highlights: [
+      "构建时间序列预测模型（LSTM），MAPE 降至 6.2%",
+      "撰写 25 页技术报告并完成可视化演示"
+    ],
+    link: "#",
+  },
+];
 
-    /* section */
-    section{padding:56px 0}
-    .section-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-    .section-title h3{margin:0;font-size:24px}
-    .muted{color:var(--muted)}
+const PROJECTS = [
+  {
+    title: "实时校园出行可视化平台",
+    role: "全栈开发",
+    period: "2024.03–2024.07",
+    tech: ["Next.js", "TailwindCSS", "WebSocket", "Mapbox GL"],
+    description:
+      "整合实时公交/共享单车数据，提供路线规划与拥堵热力图。",
+    impact: [
+      "日活 2,000+，平均响应时间 180ms",
+      "引入增量渲染将首屏 LCP 从 3.1s 降至 1.8s"
+    ],
+    links: { demo: "#", code: "#", post: "#" },
+    cover: "https://images.unsplash.com/photo-1552083375-1447ce886485?w=1200&h=600&fit=crop&auto=format",
+  },
+  {
+    title: "细粒度图像分类（毕业设计）",
+    role: "算法工程",
+    period: "2023.10–2024.06",
+    tech: ["PyTorch", "ResNet50", "SAM", "Weights & Biases"],
+    description:
+      "在细粒度鸟类数据集上进行迁移学习与数据增强，提升小样本分类效果。",
+    impact: [
+      "Top-1 准确率 92.4%（+4.7%）",
+      "训练时长缩短 35%，推理延迟 28ms"
+    ],
+    links: { code: "#", paper: "#" },
+    cover: "https://images.unsplash.com/photo-1510936111840-65e151ad71bb?w=1200&h=600&fit=crop&auto=format",
+  },
+];
 
-    /* Research Areas */
-    .areas{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .area{padding:18px;display:flex;flex-direction:column;gap:8px}
-    .area h4{margin:0;font-size:18px}
-    .area p{margin:0;color:var(--muted);font-size:14px}
+const RESEARCH = [
+  {
+    title: "Paper A: Efficient Graph Neural Networks for Traffic Forecasting",
+    venue: "IEEE BigData Workshop",
+    date: "2024-12",
+    authors: ["你的姓名", "合作者1", "合作者2"],
+    highlights: [
+      "提出轻量化 GNN 模块，将参数量减少 38%",
+      "在 PeMS-Bay 上 MAE 降低 9.3%"
+    ],
+    links: { paper: "#", code: "#", slide: "#" },
+  },
+  {
+    title: "Paper B: Prompting for Code Generation in Education Tools",
+    venue: "arXiv",
+    date: "2023-08",
+    authors: ["你的姓名", "合作者 A"],
+    highlights: [
+      "构建基于大模型的编程学习助教原型",
+      "在真实课程中 A/B 提升作业通过率 12%"
+    ],
+    links: { paper: "#" },
+  },
+];
 
-    /* People */
-    .people-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .person{display:flex;gap:14px;padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(2,6,23,.5)}
-    .avatar{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,#1f2937,#0b1020);display:grid;place-items:center;color:#cbd5e1;font-weight:700}
-    .person h5{margin:2px 0 2px;font-size:16px}
-    .person .role{color:#93c5fd;font-size:13px}
-    .person .links{display:flex;gap:10px;margin-top:6px}
+// ======== 组件样式工具 ========
+const Section = ({ id, icon: Icon, title, children }: any) => (
+  <section id={id} className="scroll-mt-24 py-14 sm:py-20">
+    <div className="max-w-5xl mx-auto px-4">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 rounded-2xl bg-gray-100 dark:bg-gray-800"><Icon className="w-5 h-5" /></div>
+        <h2 className="text-2xl sm:text-3xl font-semibold">{title}</h2>
+      </div>
+      {children}
+    </div>
+  </section>
+);
 
-    /* Publications */
-    .filters{display:flex;flex-wrap:wrap;gap:10px}
-    .filters button{border-radius:999px;border:1px solid rgba(255,
+const Card = ({ children, className = "" }: any) => (
+  <div className={`rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm p-5 bg-white/70 dark:bg-gray-900/70 backdrop-blur ${className}`}>{children}</div>
+);
+
+const Chip = ({ children }: any) => (
+  <span className="px-2 py-1 text-xs rounded-full border border-gray-300 dark:border-gray-700">{children}</span>
+);
+
+// ======== 页面 ========
+export default function PersonalSite() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => 'light');
+
+  return (
+    <div className={theme === 'dark' ? 'dark' : ''}>
+      <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950 text-gray-900 dark:text-gray-100">
+        {/* 顶部导航 */}
+        <header className="sticky top-0 z-50 border-b border-gray-200/60 dark:border-gray-800/60 backdrop-blur bg-white/70 dark:bg-black/50">
+          <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+            <a href="#top" className="font-semibold">{PROFILE.name}</a>
+            <nav className="hidden sm:flex items-center gap-5 text-sm">
+              <a href="#basics" className="hover:underline">基本信息</a>
+              <a href="#competitions" className="hover:underline">竞赛</a>
+              <a href="#projects" className="hover:underline">项目</a>
+              <a href="#research" className="hover:underline">科研</a>
+              <a href="#contact" className="hover:underline">联系</a>
+            </nav>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="text-xs border rounded-xl px-2 py-1">
+                {theme === 'dark' ? '☀️' : '🌙'}
+              </button>
+              {PROFILE.links.resume && (
+                <a href={PROFILE.links.resume} className="text-xs border rounded-xl px-2 py-1 flex items-center gap-1"><Download className="w-3 h-3"/> 简历</a>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* 首屏 / Hero */}
+        <main id="top" className="relative">
+          <section className="max-w-5xl mx-auto px-4 pt-10 sm:pt-16">
+            <div className="grid grid-cols-1 sm:grid-cols-[auto,1fr] gap-6 items-center">
+              <motion.img
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
+                src={PROFILE.avatar}
+                alt="avatar"
+                className="w-28 h-28 rounded-2xl object-cover border border-gray-200 dark:border-gray-800"
+              />
+              <div>
+                <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">{PROFILE.name}</h1>
+                <p className="mt-2 text-gray-600 dark:text-gray-400">{PROFILE.title}</p>
+                <div className="mt-3 flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                  <span className="inline-flex items-center gap-1"><MapPin className="w-4 h-4" />{PROFILE.location}</span>
+                  <a href={`mailto:${PROFILE.contactEmail}`} className="inline-flex items-center gap-1 hover:underline"><Mail className="w-4 h-4" />{PROFILE.contactEmail}</a>
+                </div>
+                <p className="mt-4 max-w-2xl leading-7">{PROFILE.summary}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  {PROFILE.links.github && <a className="text-sm inline-flex items-center gap-1 border rounded-xl px-3 py-1" href={PROFILE.links.github}><Github className="w-4 h-4"/>GitHub</a>}
+                  {PROFILE.links.linkedin && <a className="text-sm inline-flex items-center gap-1 border rounded-xl px-3 py-1" href={PROFILE.links.linkedin}><Linkedin className="w-4 h-4"/>LinkedIn</a>}
+                  {PROFILE.links.website && <a className="text-sm inline-flex items-center gap-1 border rounded-xl px-3 py-1" href={PROFILE.links.website}><Globe className="w-4 h-4"/>Website</a>}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 基本信息 */}
+          <Section id="basics" icon={GraduationCap} title="个人基本信息">
+            <Card>
+              <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+                {PROFILE.basics.map((item, idx) => (
+                  <div key={idx} className="flex">
+                    <dt className="w-24 shrink-0 text-gray-500 dark:text-gray-400">{item.label}</dt>
+                    <dd className="flex-1 font-medium">{item.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Card>
+          </Section>
+
+          {/* 竞赛经历 */}
+          <Section id="competitions" icon={Award} title="竞赛经历">
+            <div className="grid gap-4">
+              {COMPETITIONS.map((c, i) => (
+                <Card key={i}>
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-lg font-semibold">{c.name}</h3>
+                        <Chip>{c.level}</Chip>
+                        <span className="text-sm text-gray-500">{c.org}</span>
+                      </div>
+                      <div className="mt-1 text-sm text-gray-500">{c.date} · {c.team}</div>
+                      <ul className="mt-3 list-disc pl-5 space-y-1">
+                        {c.highlights.map((h, idx) => (<li key={idx}>{h}</li>))}
+                      </ul>
+                    </div>
+                    {c.link && (
+                      <a href={c.link} className="text-sm inline-flex items-center gap-1 self-start mt-1 sm:mt-0">
+                        查看详情 <ChevronRight className="w-4 h-4"/>
+                      </a>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Section>
+
+          {/* 项目经历 */}
+          <Section id="projects" icon={Hammer} title="项目经历">
+            <div className="grid md:grid-cols-2 gap-5">
+              {PROJECTS.map((p, i) => (
+                <Card key={i}>
+                  {p.cover && (
+                    <img src={p.cover} alt={p.title} className="w-full h-40 object-cover rounded-xl mb-3" />
+                  )}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-lg font-semibold">{p.title}</h3>
+                    <Chip>{p.role}</Chip>
+                    <span className="text-sm text-gray-500">{p.period}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{p.description}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {p.tech.map((t, idx) => (<Chip key={idx}>{t}</Chip>))}
+                  </div>
+                  {p.impact?.length ? (
+                    <ul className="mt-3 list-disc pl-5 space-y-1">
+                      {p.impact.map((h, idx) => (<li key={idx} className="text-sm">{h}</li>))}
+                    </ul>
+                  ) : null}
+                  {(p.links?.demo || p.links?.code || p.links?.post) && (
+                    <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                      {p.links.demo && <a className="inline-flex items-center gap-1" href={p.links.demo}>Demo <ChevronRight className="w-4 h-4"/></a>}
+                      {p.links.code && <a className="inline-flex items-center gap-1" href={p.links.code}>GitHub <ChevronRight className="w-4 h-4"/></a>}
+                      {p.links.post && <a className="inline-flex items-center gap-1" href={p.links.post}>文章 <ChevronRight className="w-4 h-4"/></a>}
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </Section>
+
+          {/* 科研经历 */}
+          <Section id="research" icon={FlaskConical} title="科研经历">
+            <div className="grid gap-4">
+              {RESEARCH.map((r, i) => (
+                <Card key={i}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-lg font-semibold">{r.title}</h3>
+                    <Chip>{r.venue}</Chip>
+                    <span className="text-sm text-gray-500">{r.date}</span>
+                  </div>
+                  <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">作者：{r.authors.join(', ')}</div>
+                  <ul className="mt-3 list-disc pl-5 space-y-1">
+                    {r.highlights.map((h, idx) => (<li key={idx} className="text-sm">{h}</li>))}
+                  </ul>
+                  {(r.links?.paper || r.links?.code || r.links?.slide) && (
+                    <div className="mt-3 flex flex-wrap gap-3 text-sm">
+                      {r.links.paper && <a className="inline-flex items-center gap-1" href={r.links.paper}>论文 <ChevronRight className="w-4 h-4"/></a>}
+                      {r.links.code && <a className="inline-flex items-center gap-1" href={r.links.code}>代码 <ChevronRight className="w-4 h-4"/></a>}
+                      {r.links.slide && <a className="inline-flex items-center gap-1" href={r.links.slide}>Slides <ChevronRight className="w-4 h-4"/></a>}
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+          </Section>
+
+          {/* 联系方式 */}
+          <Section id="contact" icon={Mail} title="联系我">
+            <Card>
+              <p className="text-sm text-gray-600 dark:text-gray-400">欢迎就实习 / 全职 / 合作交流：</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <a className="inline-flex items-center gap-2 border rounded-xl px-3 py-1" href={`mailto:${PROFILE.contactEmail}`}>
+                  <Mail className="w-4 h-4"/> {PROFILE.contactEmail}
+                </a>
+                {PROFILE.links.github && <a className="inline-flex items-center gap-2 border rounded-xl px-3 py-1" href={PROFILE.links.github}><Github className="w-4 h-4"/>GitHub</a>}
+                {PROFILE.links.linkedin && <a className="inline-flex items-center gap-2 border rounded-xl px-3 py-1" href={PROFILE.links.linkedin}><Linkedin className="w-4 h-4"/>LinkedIn</a>}
+                {PROFILE.links.website && <a className="inline-flex items-center gap-2 border rounded-xl px-3 py-1" href={PROFILE.links.website}><Globe className="w-4 h-4"/>Website</a>}
+              </div>
+            </Card>
+          </Section>
+        </main>
+
+        {/* 页脚 */}
+        <footer className="py-10 text-center text-sm text-gray-500">
+          © {new Date().getFullYear()} {PROFILE.name}. All rights reserved.
+        </footer>
+      </div>
+    </div>
+  );
+}
